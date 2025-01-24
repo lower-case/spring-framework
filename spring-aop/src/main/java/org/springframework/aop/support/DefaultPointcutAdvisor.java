@@ -19,9 +19,9 @@ package org.springframework.aop.support;
 import java.io.Serializable;
 
 import org.aopalliance.aop.Advice;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.lang.Nullable;
 
 /**
  * Convenient Pointcut-driven Advisor implementation.
@@ -43,7 +43,7 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 
 	/**
 	 * Create an empty DefaultPointcutAdvisor.
-	 * <p>Advice must be set before use using setter methods.
+	 * <p>Advice must be set before using setter methods.
 	 * Pointcut will normally be set also, but defaults to {@code Pointcut.TRUE}.
 	 */
 	public DefaultPointcutAdvisor() {

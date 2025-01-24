@@ -19,7 +19,7 @@ package org.springframework.web.servlet.mvc.condition;
 import java.util.Collection;
 import java.util.StringJoiner;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A base class for {@link RequestCondition} types providing implementations of
@@ -33,7 +33,7 @@ import org.springframework.lang.Nullable;
 public abstract class AbstractRequestCondition<T extends AbstractRequestCondition<T>> implements RequestCondition<T> {
 
 	/**
-	 * Indicates whether this condition is empty, i.e. whether or not it
+	 * Indicates whether this condition is empty, i.e. whether it
 	 * contains any discrete items.
 	 * @return {@code true} if empty; {@code false} otherwise
 	 */

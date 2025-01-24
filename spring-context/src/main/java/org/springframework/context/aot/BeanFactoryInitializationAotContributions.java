@@ -20,8 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.aot.generate.GenerationContext;
-import org.springframework.beans.factory.aot.AotFactoriesLoader;
+import org.springframework.beans.factory.aot.AotException;
+import org.springframework.beans.factory.aot.AotProcessingException;
+import org.springframework.beans.factory.aot.AotServices;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotContribution;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationAotProcessor;
 import org.springframework.beans.factory.aot.BeanFactoryInitializationCode;
@@ -41,19 +45,19 @@ class BeanFactoryInitializationAotContributions {
 
 
 	BeanFactoryInitializationAotContributions(DefaultListableBeanFactory beanFactory) {
-		this(beanFactory, new AotFactoriesLoader(beanFactory));
+		this(beanFactory, AotServices.factoriesAndBeans(beanFactory));
 	}
 
 	BeanFactoryInitializationAotContributions(DefaultListableBeanFactory beanFactory,
-			AotFactoriesLoader loader) {
+			AotServices.Loader loader) {
 		this.contributions = getContributions(beanFactory, getProcessors(loader));
 	}
 
 
-	private List<BeanFactoryInitializationAotProcessor> getProcessors(
-			AotFactoriesLoader loader) {
+	private static List<BeanFactoryInitializationAotProcessor> getProcessors(
+			AotServices.Loader loader) {
 		List<BeanFactoryInitializationAotProcessor> processors = new ArrayList<>(
-				loader.load(BeanFactoryInitializationAotProcessor.class));
+				loader.load(BeanFactoryInitializationAotProcessor.class).asList());
 		processors.add(new RuntimeHintsBeanFactoryInitializationAotProcessor());
 		return Collections.unmodifiableList(processors);
 	}
@@ -63,13 +67,27 @@ class BeanFactoryInitializationAotContributions {
 			List<BeanFactoryInitializationAotProcessor> processors) {
 		List<BeanFactoryInitializationAotContribution> contributions = new ArrayList<>();
 		for (BeanFactoryInitializationAotProcessor processor : processors) {
-			BeanFactoryInitializationAotContribution contribution = processor
-					.processAheadOfTime(beanFactory);
+			BeanFactoryInitializationAotContribution contribution = processAheadOfTime(processor, beanFactory);
 			if (contribution != null) {
 				contributions.add(contribution);
 			}
 		}
 		return Collections.unmodifiableList(contributions);
+	}
+
+	private @Nullable BeanFactoryInitializationAotContribution processAheadOfTime(BeanFactoryInitializationAotProcessor processor,
+			DefaultListableBeanFactory beanFactory) {
+
+		try {
+			return processor.processAheadOfTime(beanFactory);
+		}
+		catch (AotException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new AotProcessingException("Error executing '" +
+					processor.getClass().getName() + "': " + ex.getMessage(), ex);
+		}
 	}
 
 	void applyTo(GenerationContext generationContext,

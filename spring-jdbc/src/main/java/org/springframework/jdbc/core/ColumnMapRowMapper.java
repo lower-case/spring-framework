@@ -21,8 +21,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
@@ -84,14 +85,13 @@ public class ColumnMapRowMapper implements RowMapper<Map<String, Object>> {
 	 * Retrieve a JDBC object value for the specified column.
 	 * <p>The default implementation uses the {@code getObject} method.
 	 * Additionally, this implementation includes a "hack" to get around Oracle
-	 * returning a non standard object for their TIMESTAMP data type.
+	 * returning a non-standard object for their TIMESTAMP data type.
 	 * @param rs the ResultSet holding the data
 	 * @param index the column index
 	 * @return the Object returned
 	 * @see org.springframework.jdbc.support.JdbcUtils#getResultSetValue
 	 */
-	@Nullable
-	protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+	protected @Nullable Object getColumnValue(ResultSet rs, int index) throws SQLException {
 		return JdbcUtils.getResultSetValue(rs, index);
 	}
 

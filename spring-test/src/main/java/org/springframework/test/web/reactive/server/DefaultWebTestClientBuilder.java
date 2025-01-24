@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2025 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,16 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.reactive.ClientHttpConnector;
 import org.springframework.http.client.reactive.HttpComponentsClientHttpConnector;
+import org.springframework.http.client.reactive.JdkClientHttpConnector;
 import org.springframework.http.client.reactive.JettyClientHttpConnector;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.http.client.reactive.ReactorNetty2ClientHttpConnector;
 import org.springframework.http.codec.ClientCodecConfigurer;
-import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
@@ -51,7 +54,9 @@ import org.springframework.web.util.UriBuilderFactory;
  */
 class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
-	private static final boolean reactorClientPresent;
+	private static final boolean reactorNettyClientPresent;
+
+	private static final boolean reactorNetty2ClientPresent;
 
 	private static final boolean jettyClientPresent;
 
@@ -61,7 +66,8 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	static {
 		ClassLoader loader = DefaultWebTestClientBuilder.class.getClassLoader();
-		reactorClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNettyClientPresent = ClassUtils.isPresent("reactor.netty.http.client.HttpClient", loader);
+		reactorNetty2ClientPresent = ClassUtils.isPresent("reactor.netty5.http.client.HttpClient", loader);
 		jettyClientPresent = ClassUtils.isPresent("org.eclipse.jetty.client.HttpClient", loader);
 		httpComponentsClientPresent =
 				ClassUtils.isPresent("org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient", loader) &&
@@ -71,37 +77,27 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 
-	@Nullable
-	private final WebHttpHandlerBuilder httpHandlerBuilder;
+	private final @Nullable WebHttpHandlerBuilder httpHandlerBuilder;
 
-	@Nullable
-	private final ClientHttpConnector connector;
+	private @Nullable ClientHttpConnector connector;
 
-	@Nullable
-	private String baseUrl;
+	private @Nullable String baseUrl;
 
-	@Nullable
-	private UriBuilderFactory uriBuilderFactory;
+	private @Nullable UriBuilderFactory uriBuilderFactory;
 
-	@Nullable
-	private HttpHeaders defaultHeaders;
+	private @Nullable HttpHeaders defaultHeaders;
 
-	@Nullable
-	private MultiValueMap<String, String> defaultCookies;
+	private @Nullable MultiValueMap<String, String> defaultCookies;
 
-	@Nullable
-	private List<ExchangeFilterFunction> filters;
+	private @Nullable List<ExchangeFilterFunction> filters;
 
 	private Consumer<EntityExchangeResult<?>> entityResultConsumer = result -> {};
 
-	@Nullable
-	private ExchangeStrategies strategies;
+	private @Nullable ExchangeStrategies strategies;
 
-	@Nullable
-	private List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
+	private @Nullable List<Consumer<ExchangeStrategies.Builder>> strategiesConfigurers;
 
-	@Nullable
-	private Duration responseTimeout;
+	private @Nullable Duration responseTimeout;
 
 
 	/** Determine connector via classpath detection. */
@@ -230,7 +226,7 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 
 	@Override
 	public WebTestClient.Builder entityExchangeResultConsumer(Consumer<EntityExchangeResult<?>> entityResultConsumer) {
-		Assert.notNull(entityResultConsumer, "`entityResultConsumer` is required");
+		Assert.notNull(entityResultConsumer, "'entityResultConsumer' is required");
 		this.entityResultConsumer = this.entityResultConsumer.andThen(entityResultConsumer);
 		return this;
 	}
@@ -251,16 +247,6 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public WebTestClient.Builder exchangeStrategies(Consumer<ExchangeStrategies.Builder> configurer) {
-		if (this.strategiesConfigurers == null) {
-			this.strategiesConfigurers = new ArrayList<>(4);
-		}
-		this.strategiesConfigurers.add(configurer);
-		return this;
-	}
-
-	@Override
 	public WebTestClient.Builder apply(WebTestClientConfigurer configurer) {
 		configurer.afterConfigurerAdded(this, this.httpHandlerBuilder, this.connector);
 		return this;
@@ -269,6 +255,12 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 	@Override
 	public WebTestClient.Builder responseTimeout(Duration timeout) {
 		this.responseTimeout = timeout;
+		return this;
+	}
+
+	@Override
+	public WebTestClient.Builder clientConnector(ClientHttpConnector connector) {
+		this.connector = connector;
 		return this;
 	}
 
@@ -283,8 +275,9 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		if (connectorToUse == null) {
 			connectorToUse = initConnector();
 		}
+		ExchangeStrategies exchangeStrategies = initExchangeStrategies();
 		Function<ClientHttpConnector, ExchangeFunction> exchangeFactory = connector -> {
-			ExchangeFunction exchange = ExchangeFunctions.create(connector, initExchangeStrategies());
+			ExchangeFunction exchange = ExchangeFunctions.create(connector, exchangeStrategies);
 			if (CollectionUtils.isEmpty(this.filters)) {
 				return exchange;
 			}
@@ -294,15 +287,18 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 					.orElse(exchange);
 
 		};
-		return new DefaultWebTestClient(connectorToUse, exchangeFactory, initUriBuilderFactory(),
+		return new DefaultWebTestClient(connectorToUse, exchangeStrategies, exchangeFactory, initUriBuilderFactory(),
 				this.defaultHeaders != null ? HttpHeaders.readOnlyHttpHeaders(this.defaultHeaders) : null,
 				this.defaultCookies != null ? CollectionUtils.unmodifiableMultiValueMap(this.defaultCookies) : null,
 				this.entityResultConsumer, this.responseTimeout, new DefaultWebTestClientBuilder(this));
 	}
 
 	private static ClientHttpConnector initConnector() {
-		if (reactorClientPresent) {
+		if (reactorNettyClientPresent) {
 			return new ReactorClientHttpConnector();
+		}
+		else if (reactorNetty2ClientPresent) {
+			return new ReactorNetty2ClientHttpConnector();
 		}
 		else if (jettyClientPresent) {
 			return new JettyClientHttpConnector();
@@ -310,7 +306,9 @@ class DefaultWebTestClientBuilder implements WebTestClient.Builder {
 		else if (httpComponentsClientPresent) {
 			return new HttpComponentsClientHttpConnector();
 		}
-		throw new IllegalStateException("No suitable default ClientHttpConnector found");
+		else {
+			return new JdkClientHttpConnector();
+		}
 	}
 
 	private ExchangeStrategies initExchangeStrategies() {

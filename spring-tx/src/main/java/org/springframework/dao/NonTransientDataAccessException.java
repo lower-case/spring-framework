@@ -16,7 +16,7 @@
 
 package org.springframework.dao;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Root of the hierarchy of data access exceptions that are considered non-transient -
@@ -34,14 +34,14 @@ public abstract class NonTransientDataAccessException extends DataAccessExceptio
 	 * Constructor for NonTransientDataAccessException.
 	 * @param msg the detail message
 	 */
-	public NonTransientDataAccessException(String msg) {
+	public NonTransientDataAccessException(@Nullable String msg) {
 		super(msg);
 	}
 
 	/**
 	 * Constructor for NonTransientDataAccessException.
 	 * @param msg the detail message
-	 * @param cause the root cause (usually from using a underlying
+	 * @param cause the root cause (usually from using an underlying
 	 * data access API such as JDBC)
 	 */
 	public NonTransientDataAccessException(@Nullable String msg, @Nullable Throwable cause) {

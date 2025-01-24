@@ -16,7 +16,7 @@
 
 package org.springframework.core.style;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A strategy interface for pretty-printing {@code toString()} methods.
@@ -45,7 +45,7 @@ public interface ToStringStyler {
 	/**
 	 * Style a field value as a string.
 	 * @param buffer the buffer to print to
-	 * @param fieldName the he name of the field
+	 * @param fieldName the name of the field
 	 * @param value the field value
 	 */
 	void styleField(StringBuilder buffer, String fieldName, @Nullable Object value);

@@ -18,6 +18,7 @@ package org.springframework.beans.factory.xml;
 
 import java.util.Collection;
 
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -28,7 +29,6 @@ import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.core.Conventions;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -50,7 +50,7 @@ import org.springframework.util.StringUtils;
  * the bean that will be considered as a parameter.
  *
  * <b>Note</b>: This implementation supports only named parameters - there is no
- * support for indexes or types. Further more, the names are used as hints by
+ * support for indexes or types. Furthermore, the names are used as hints by
  * the container which, by default, does type introspection.
  *
  * @author Costin Leau
@@ -69,8 +69,7 @@ public class SimpleConstructorNamespaceHandler implements NamespaceHandler {
 	}
 
 	@Override
-	@Nullable
-	public BeanDefinition parse(Element element, ParserContext parserContext) {
+	public @Nullable BeanDefinition parse(Element element, ParserContext parserContext) {
 		parserContext.getReaderContext().error(
 				"Class [" + getClass().getName() + "] does not support custom elements.", element);
 		return null;
