@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2022 the original author or authors.
+ * Copyright 2002-2023 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -476,14 +476,12 @@ class AnnotationTypeMappingsTests {
 		return result;
 	}
 
-	@Nullable
-	private Method getAliasMapping(AnnotationTypeMapping mapping, int attributeIndex) {
+	private @Nullable Method getAliasMapping(AnnotationTypeMapping mapping, int attributeIndex) {
 		int mapped = mapping.getAliasMapping(attributeIndex);
 		return mapped != -1 ? mapping.getRoot().getAttributes().get(mapped) : null;
 	}
 
-	@Nullable
-	private Method getConventionMapping(AnnotationTypeMapping mapping, int attributeIndex) {
+	private @Nullable Method getConventionMapping(AnnotationTypeMapping mapping, int attributeIndex) {
 		int mapped = mapping.getConventionMapping(attributeIndex);
 		return mapped != -1 ? mapping.getRoot().getAttributes().get(mapped) : null;
 	}

@@ -25,17 +25,16 @@ import javax.xml.XMLConstants;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 
+import org.jspecify.annotations.Nullable;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.ext.LexicalHandler;
 
-import org.springframework.lang.Nullable;
-
 /**
  * Abstract base class for SAX {@code ContentHandler} and {@code LexicalHandler}
  * implementations that use StAX as a basis. All methods delegate to internal template
- * methods, capable of throwing a {@code XMLStreamException}. Additionally, an namespace
+ * methods, capable of throwing a {@code XMLStreamException}. Additionally, a namespace
  * context stack is used to keep track of declared namespaces.
  *
  * @author Arjen Poutsma

@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -29,7 +30,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.lang.Nullable;
 
 /**
  * Strategy for encoding a stream of objects of type {@code <T>} and writing
@@ -76,7 +76,7 @@ public interface HttpMessageWriter<T> {
 	boolean canWrite(ResolvableType elementType, @Nullable MediaType mediaType);
 
 	/**
-	 * Write an given stream of object to the output message.
+	 * Write a given stream of object to the output message.
 	 * @param inputStream the objects to write
 	 * @param elementType the type of objects in the stream which must have been
 	 * previously checked via {@link #canWrite(ResolvableType, MediaType)}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2021 the original author or authors.
+ * Copyright 2002-2022 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import jakarta.xml.bind.UnmarshalException;
 import jakarta.xml.bind.Unmarshaller;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
+import org.jspecify.annotations.Nullable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -46,7 +47,6 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.xml.StaxUtils;
 
@@ -173,7 +173,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 		}
 		catch (UnmarshalException ex) {
 			throw new HttpMessageNotReadableException(
-					"Could not unmarshal to [" + elementClass + "]: " + ex.getMessage(), ex, inputMessage);
+					"Could not unmarshal to [" + elementClass + "]: " + ex, ex, inputMessage);
 		}
 		catch (JAXBException ex) {
 			throw new HttpMessageConversionException("Invalid JAXB setup: " + ex.getMessage(), ex);

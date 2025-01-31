@@ -19,10 +19,11 @@ package org.springframework.core.type.filter;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
 
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.classreading.MetadataReader;
-import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
 
 /**
@@ -32,7 +33,7 @@ import org.springframework.util.ClassUtils;
  * <p>By default, the matching logic mirrors that of
  * {@link AnnotationUtils#getAnnotation(java.lang.reflect.AnnotatedElement, Class)},
  * supporting annotations that are <em>present</em> or <em>meta-present</em> for a
- * single level of meta-annotations. The search for meta-annotations my be disabled.
+ * single level of meta-annotations. The search for meta-annotations may be disabled.
  * Similarly, the search for annotations on interfaces may optionally be enabled.
  * Consult the various constructors in this class for details.
  *
@@ -102,19 +103,16 @@ public class AnnotationTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	}
 
 	@Override
-	@Nullable
-	protected Boolean matchSuperClass(String superClassName) {
+	protected @Nullable Boolean matchSuperClass(String superClassName) {
 		return hasAnnotation(superClassName);
 	}
 
 	@Override
-	@Nullable
-	protected Boolean matchInterface(String interfaceName) {
+	protected @Nullable Boolean matchInterface(String interfaceName) {
 		return hasAnnotation(interfaceName);
 	}
 
-	@Nullable
-	protected Boolean hasAnnotation(String typeName) {
+	protected @Nullable Boolean hasAnnotation(String typeName) {
 		if (Object.class.getName().equals(typeName)) {
 			return false;
 		}

@@ -16,7 +16,8 @@
 
 package org.springframework.messaging.support;
 
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
@@ -46,8 +47,7 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @param handler the target handler to handle the message
 	 * @return the input message, or a new instance, or {@code null}
 	 */
-	@Nullable
-	default Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
+	default @Nullable Message<?> beforeHandle(Message<?> message, MessageChannel channel, MessageHandler handler) {
 		return message;
 	}
 
@@ -60,7 +60,7 @@ public interface ExecutorChannelInterceptor extends ChannelInterceptor {
 	 * @param message the message handled
 	 * @param channel the channel on which the message was sent to
 	 * @param handler the target handler that handled the message
-	 * @param ex any exception that may been raised by the handler
+	 * @param ex any exception that may have been raised by the handler
 	 */
 	default void afterMessageHandled(Message<?> message, MessageChannel channel, MessageHandler handler,
 			@Nullable Exception ex) {

@@ -16,19 +16,19 @@
 
 package org.springframework.web.reactive.result.method.annotation;
 
+import org.jspecify.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ReactiveAdapterRegistry;
-import org.springframework.lang.Nullable;
 import org.springframework.web.reactive.BindingContext;
 import org.springframework.web.reactive.result.method.SyncHandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
  * An extension of {@link AbstractNamedValueArgumentResolver} for named value
- * resolvers that are synchronous and yet non-blocking. Sub-classes implement
+ * resolvers that are synchronous and yet non-blocking. Subclasses implement
  * the synchronous {@link #resolveNamedValue} to which the asynchronous
  * {@link #resolveName} delegates to by default.
  *
@@ -80,7 +80,6 @@ public abstract class AbstractNamedValueSyncArgumentResolver extends AbstractNam
 	/**
 	 * Actually resolve the value synchronously.
 	 */
-	@Nullable
-	protected abstract Object resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange);
+	protected abstract @Nullable Object resolveNamedValue(String name, MethodParameter param, ServerWebExchange exchange);
 
 }
